@@ -1,0 +1,63 @@
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+import org.json.JSONObject;
+
+public class CurrencyConverter {
+
+    private static final String API_KEY = "YOUR_API_KEY"; 
+    
+    public static double getExchangeRate(String baseCurrency, String targetCurrency) {
+        try {
+            
+            String urlString = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/" + baseCurrency;
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            
+            Scanner scanner = new Scanner(connection.getInputStream());
+            String response = "";
+            while (scanner.hasNext()) {
+                response += scanner.nextLine();
+            }
+            scanner.close();
+            
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONObject conversionRates = jsonResponse.getJSONObject("conversion_rates");
+            return conversionRates.getDouble(targetCurrency);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter base currency (e.g., USD, EUR, GBP): ");
+        String baseCurrency = scanner.nextLine().toUpperCase();
+
+        System.out.println("Enter target currency (e.g., USD, EUR, GBP): ");
+        String targetCurrency = scanner.nextLine().toUpperCase();
+
+        System.out.println("Enter amount to convert: ");
+        double amount = scanner.nextDouble();
+
+        double exchangeRate = getExchangeRate(baseCurrency, targetCurrency);
+
+        if (exchangeRate != 0) {
+            double convertedAmount = amount * exchangeRate;
+
+            System.out.println(amount + " " + baseCurrency + " is equal to " + convertedAmount + " " + targetCurrency);
+        } else {
+            System.out.println("Error: Unable to fetch exchange rates.");
+        }
+
+        scanner.close();
+    }
+}
+
+
+
+
+
